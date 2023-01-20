@@ -31,7 +31,6 @@ func main() {
 		}
 
 		go func(conn net.Conn) {
-			conn.(*net.TCPConn).SetKeepAlive(true)
 			conn.Write([]byte("+PONG\r\n"))
 		}(conn)
 
