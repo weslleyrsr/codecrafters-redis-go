@@ -19,6 +19,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	defer l.Close()
+
 	fmt.Println("Server listening to port 6379")
 
 	for {
