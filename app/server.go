@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+
 	// Uncomment this block to pass the first stage
 	"net"
 	"os"
@@ -31,7 +33,16 @@ func main() {
 		}
 
 		go func(conn net.Conn) {
-			conn.Write([]byte("+PONG\r\n"))
+			for {
+				_, err := bufio.NewReader(c).ReadString('\n')
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				conn.Write([]byte("+PONG\r\n"))
+			}
+			conn.Close()
 		}(conn)
 
 	}
