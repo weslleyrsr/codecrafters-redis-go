@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"strings"
 
 	// Uncomment this block to pass the first stage
 	"net"
@@ -34,10 +35,15 @@ func main() {
 
 		go func(conn net.Conn) {
 			for {
-				_, err := bufio.NewReader(c).ReadString('\n')
+				netData, err := bufio.NewReader(conn).ReadString('\n')
 				if err != nil {
 					fmt.Println(err)
 					return
+				}
+
+				temp := strings.TrimSpace(string(netData))
+				if temp == "STOP" {
+					break
 				}
 
 				conn.Write([]byte("+PONG\r\n"))
