@@ -33,23 +33,24 @@ func main() {
 			os.Exit(1)
 		}
 
-		go func(conn net.Conn) {
-			for {
-				netData, err := bufio.NewReader(conn).ReadString('\n')
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-
-				temp := strings.TrimSpace(string(netData))
-				if temp == "STOP" {
-					break
-				}
-
-				conn.Write([]byte("+PONG\r\n"))
-			}
-			conn.Close()
-		}(conn)
-
+		go handleMessage(conn)
 	}
+}
+
+func handleMessage(conn net.Conn) {
+	for {
+		netData, err := bufio.NewReader(conn).ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		temp := strings.TrimSpace(string(netData))
+		if temp == "STOP" {
+			break
+		}
+
+		conn.Write([]byte("+PONG\r\n"))
+	}
+	conn.Close()
 }
