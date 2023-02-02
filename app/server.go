@@ -69,6 +69,8 @@ func handleMessage(conn net.Conn) {
 			break
 		}
 
+		fmt.Println(netData)
+
 		command, value := parseResp(strings.TrimSpace(netData))
 
 		temp := strings.ToUpper(command)
@@ -84,6 +86,7 @@ func handleMessage(conn net.Conn) {
 		} else {
 			conn.Write([]byte("-INVALID COMMAND\r\n"))
 		}
+
 	}
 }
 
