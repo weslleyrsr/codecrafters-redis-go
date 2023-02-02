@@ -34,14 +34,12 @@ func main() {
 	}
 }
 
-type Type byte
-
 const (
-	SimpleString Type = '+'
-	Error        Type = '-'
-	Integer      Type = ':'
-	BulkString   Type = '$'
-	Array        Type = '*'
+	SimpleString = '+'
+	Error        = '-'
+	Integer      = ':'
+	BulkString   = '$'
+	Array        = '*'
 )
 
 func parseResp(respString string) (string, string) {
@@ -51,7 +49,7 @@ func parseResp(respString string) (string, string) {
 	switch respString[0] {
 	default:
 		command = "Unknown"
-	case '+':
+	case SimpleString:
 		re := regexp.MustCompile(`[^+].*[^(\\r\\n)]`)
 		match := re.FindString(respString)
 		command = match
