@@ -3,18 +3,15 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"strings"
-
-	// Uncomment this block to pass the first stage
 	"net"
 	"os"
+	"regexp"
+	"strings"
 )
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
-
-	// Uncomment this block to pass the first stage
 
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
@@ -22,7 +19,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	defer l.Close()
+	defer closeListener(l)
 
 	fmt.Println("Server listening to port 6379")
 
@@ -37,20 +34,65 @@ func main() {
 	}
 }
 
+type Type byte
+
+const (
+	SimpleString Type = '+'
+	Error        Type = '-'
+	Integer      Type = ':'
+	BulkString   Type = '$'
+	Array        Type = '*'
+)
+
+func parseResp(respString string) (string, string) {
+	var command string = ""
+	var value string = ""
+
+	switch respString[0] {
+	default:
+		command = "Unknown"
+	case '+':
+		re := regexp.MustCompile(`[^+].*[^(\\r\\n)]`)
+		match := re.FindString(respString)
+		command = match
+	}
+
+	return command, value
+}
+
 func handleMessage(conn net.Conn) {
 	for {
 		netData, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
 			fmt.Println(err)
-			return
-		}
-
-		temp := strings.TrimSpace(string(netData))
-		if temp == "STOP" {
+			closeConnection(conn)
 			break
 		}
 
-		conn.Write([]byte("+PONG\r\n"))
+		command, value := parseResp(strings.TrimSpace(netData))
+
+		temp := strings.ToUpper(command)
+		fmt.Println(temp)
+
+		if temp == "STOP" {
+			closeConnection(conn)
+			break
+		} else if temp == "PING" {
+			conn.Write([]byte("+PONG\r\n"))
+		} else if temp == "ECHO" {
+			conn.Write([]byte("-" + value + "\r\n"))
+		} else {
+			conn.Write([]byte("-INVALID COMMAND\r\n"))
+		}
 	}
-	conn.Close()
+}
+
+func closeListener(listener net.Listener) {
+	print("closing listener\n")
+	listener.Close()
+}
+
+func closeConnection(connection net.Conn) {
+	print("closing connection\n")
+	connection.Close()
 }
